@@ -10,6 +10,10 @@ provider "aws" {
   region     = "us-east-1"
 }
 
+data "aws_availability_zones" "available" {
+  state = "available"
+}
+
 resource "aws_vpc" "main" {
   cidr_block       = "10.13.37.0/24"
   enable_dns_support = "true"
@@ -20,9 +24,9 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_subnet" "tf_priv_subnet" {
-  vpc_id     = "${aws_vpc.main.id}"
+  vpc_id     = aws_vpc.main.id
   cidr_block = "10.13.37.0/27"
-
+  availability_zone = data.aws_availability_zones.available.names[0]
   tags = {
     Name = "tf_priv_subnet"
 
@@ -30,16 +34,16 @@ resource "aws_subnet" "tf_priv_subnet" {
 }
 
 resource "aws_subnet" "tf_public_subnet" {
-  vpc_id     = "${aws_vpc.main.id}"
+  vpc_id     = aws_vpc.main.id
   cidr_block = "10.13.37.32/27"
-
+  availability_zone = data.aws_availability_zones.available.names[0]
   tags = {
     Name = "tf_public_subnet"
   }
 }
 
 resource "aws_internet_gateway" "terraform_igw" {
-  vpc_id = "${aws_vpc.main.id}"
+  vpc_id = aws_vpc.main.id
 
   tags = {
     Name = "terraform_igw"
@@ -54,8 +58,8 @@ resource "aws_eip" "terraform_eip" {
 }
 
 resource "aws_nat_gateway" "gw" {
-  allocation_id = "${aws_eip.terraform_eip.id}"
-  subnet_id     = "${aws_subnet.tf_public_subnet.id}"
+  allocation_id = aws_eip.terraform_eip.id
+  subnet_id     = aws_subnet.tf_public_subnet.id
 
  tags = {
     Name = "terraform_nat_gw"
@@ -63,11 +67,11 @@ resource "aws_nat_gateway" "gw" {
 }
 
 resource "aws_route_table" "tf_private_route_table" {
-  vpc_id = "${aws_vpc.main.id}"
+  vpc_id = aws_vpc.main.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_nat_gateway.gw.id}" 
+    gateway_id = aws_nat_gateway.gw.id
   }
 
   tags = {
@@ -76,11 +80,11 @@ resource "aws_route_table" "tf_private_route_table" {
 }
 
 resource "aws_route_table" "tf_public_route_table" {
-  vpc_id = "${aws_vpc.main.id}"
+  vpc_id = aws_vpc.main.id
 
   route {
     cidr_block = "0.0.0.0/0"
-    gateway_id = "${aws_internet_gateway.terraform_igw.id}"
+    gateway_id = aws_internet_gateway.terraform_igw.id
   }
 
   tags = {
@@ -89,13 +93,13 @@ resource "aws_route_table" "tf_public_route_table" {
 }
 
 resource "aws_route_table_association" "tf_public_route_association" {
-  subnet_id      = "${aws_subnet.tf_public_subnet.id}"
-  route_table_id = "${aws_route_table.tf_public_route_table.id}"
+  subnet_id      = aws_subnet.tf_public_subnet.id
+  route_table_id = aws_route_table.tf_public_route_table.id
 }
 
 resource "aws_route_table_association" "tf_private_route_association" {
-  subnet_id      = "${aws_subnet.tf_priv_subnet.id}"
-  route_table_id = "${aws_route_table.tf_private_route_table.id}"
+  subnet_id      = aws_subnet.tf_priv_subnet.id
+  route_table_id = aws_route_table.tf_private_route_table.id
 }
 
 
@@ -123,7 +127,7 @@ EOF
 
 resource "aws_iam_policy_attachment" "Roles_for_default_ec2_instance_policy" {
   name       = "Roles_for_default_ec2_instance_policy"
-  roles      = ["${aws_iam_role.default_ec2_instance_policy.name}"]
+  roles      = [aws_iam_role.default_ec2_instance_policy.name]
   ####Use of the AmazonEC2RoleforSSM policy is not a good practice. 
   ####It includes the entitlement "S3:GetObject" without a resource clause, 
   ####so potentially anyone or attacker with access to this ec2 instance 
@@ -134,5 +138,5 @@ resource "aws_iam_policy_attachment" "Roles_for_default_ec2_instance_policy" {
 
 resource "aws_iam_instance_profile" "ssm_instance_profile_tf" {
   name = "ssm_instance_profile_tf"
-  role = "${aws_iam_role.default_ec2_instance_policy.name}"
+  role = aws_iam_role.default_ec2_instance_policy.name
 }
