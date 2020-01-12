@@ -5,11 +5,41 @@
 ####All hosts booted in the tf_priv_subnet will be able to connect to the internet
 ####Also creates an EC2 instance profile with the SSM policy, so you can SSM-SM connect into the instance
 
+variable "region" {
+  type    = string
+  default = "us-east-1"
+}
+
+variable "profile" {
+  type    = string
+  default = "default"
+}
+
 
 provider "aws" {
-  profile = "saml"
-  region  = "us-east-1"
+  profile = var.profile
+  region  = var.region
 }
+
+data "aws_ami" "al2_ami" {
+  most_recent = true
+  owners      = ["amazon"]
+  filter {
+    name   = "owner-alias"
+    values = ["amazon"]
+  }
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm*"]
+  }
+  filter {
+    name   = "architecture"
+    values = ["x86_64"]
+  }
+}
+
+
 
 data "aws_availability_zones" "available" {
   state = "available"
@@ -25,8 +55,8 @@ resource "aws_vpc" "main" {
 }
 
 resource "aws_subnet" "tf_priv_subnet" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = "10.13.37.0/27"
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.13.37.0/27"
   availability_zone = data.aws_availability_zones.available.names[0]
   tags = {
     Name = "tf_priv_subnet"
@@ -35,8 +65,8 @@ resource "aws_subnet" "tf_priv_subnet" {
 }
 
 resource "aws_subnet" "tf_public_subnet" {
-  vpc_id     = aws_vpc.main.id
-  cidr_block = "10.13.37.32/27"
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.13.37.32/27"
   availability_zone = data.aws_availability_zones.available.names[0]
   tags = {
     Name = "tf_public_subnet"
@@ -55,7 +85,7 @@ resource "aws_route_table" "tf_private_route_table" {
   vpc_id = aws_vpc.main.id
 
   route {
-    cidr_block = "0.0.0.0/0"
+    cidr_block  = "0.0.0.0/0"
     instance_id = aws_instance.NatInstance.id
   }
 
@@ -154,13 +184,13 @@ resource "aws_security_group" "nat_instance_sg" {
 #Please note that SSM has SSH and rpcbind disabled for additional hardening, but you can hit it via
 #AWS SSM session manager
 resource "aws_instance" "NatInstance" {
-  ami                         = "ami-062f7200baf2fa504"
+  ami                         = data.aws_ami.al2_ami.id
   instance_type               = "t2.micro"
   subnet_id                   = aws_subnet.tf_public_subnet.id
   associate_public_ip_address = "true"
   source_dest_check           = "false"
   vpc_security_group_ids      = [aws_security_group.nat_instance_sg.id]
-  iam_instance_profile = aws_iam_instance_profile.ssm_instance_profile_tf.id
+  iam_instance_profile        = aws_iam_instance_profile.ssm_instance_profile_tf.id
   user_data                   = <<EOF
 #!/bin/bash
 sudo sysctl -w net.ipv4.ip_forward=1
