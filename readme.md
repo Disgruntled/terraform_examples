@@ -11,7 +11,7 @@ terraform version 0.12 syntax is used, so please make sure you're at <= terrafor
 Both templates take two variables, the REGION and PROFILE
 
 ```
-terraform plan -out liam.plan -var="region=us-east-2" -var"profile=saml"
+terraform plan -out liam.plan -var="region=us-east-2" -var="profile=saml"
 ```
 
 Region should be the AWS region you want to deploy to, formatted the official manner, EG: "us-east-1" or "us-west-2". Should work fine withe very region. Defaults to us-east-1.
