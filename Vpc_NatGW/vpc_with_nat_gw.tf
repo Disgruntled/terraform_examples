@@ -151,3 +151,10 @@ resource "aws_iam_instance_profile" "ssm_instance_profile_tf" {
   name = "ssm_instance_profile_tf"
   role = aws_iam_role.default_ec2_instance_policy.name
 }
+
+output "private_subnet_id" {
+  value = aws_subnet.tf_public_subnet.id
+}
+
+output "vpc_id" {
+  value = aws_vpc.main.id
