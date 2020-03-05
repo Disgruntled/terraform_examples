@@ -1,21 +1,3 @@
-####Author: Liam.wadman@gmail.com
-####Purpose: Create an easy AWS environment that can reach out to the internet.
-####Creates a 1AZ/VPC deployment and a nat instance to forward traffic.
-####Nat Instances can be highly desireable for non-prod environments due to the cost savings.
-####All hosts booted in the tf_priv_subnet will be able to connect to the internet
-####Also creates an EC2 instance profile with the SSM policy, so you can SSM-SM connect into the instance
-
-variable "region" {
-  type    = string
-  default = "us-east-1"
-}
-
-variable "profile" {
-  type    = string
-  default = "default"
-}
-
-
 provider "aws" {
   profile = var.profile
   region  = var.region
@@ -117,46 +99,6 @@ resource "aws_route_table_association" "tf_private_route_association" {
   route_table_id = aws_route_table.tf_private_route_table.id
 }
 
-
-resource "aws_iam_role" "default_ec2_instance_policy" {
-  name = "default_ec2_instance_policy"
-
-  assume_role_policy = <<EOF
-{
-  "Version": "2012-10-17",
-  "Statement": [
-    {
-      "Action": "sts:AssumeRole",
-      "Principal": {
-        "Service": "ec2.amazonaws.com"
-      },
-      "Effect": "Allow",
-      "Sid": ""
-    }
-  ]
-}
-EOF
-
-}
-
-resource "aws_iam_policy_attachment" "Roles_for_default_ec2_instance_policy" {
-  name  = "Roles_for_default_ec2_instance_policy"
-  roles = [aws_iam_role.default_ec2_instance_policy.name]
-  ####Use of the AmazonEC2RoleforSSM policy is not a good practice. 
-  ####It includes the entitlement "S3:GetObject" without a resource clause, 
-  ####so potentially anyone or attacker with access to this ec2 instance 
-  ####may be able to read all your buckets unless you take further steps!!!!!
-  ####Real scenarios with an obligation to protect data should make a better policy.
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AmazonEC2RoleforSSM"
-
-}
-
-resource "aws_iam_instance_profile" "ssm_instance_profile_tf" {
-  name = "ssm_instance_profile_tf"
-  role = aws_iam_role.default_ec2_instance_policy.name
-}
-
-
 resource "aws_security_group" "nat_instance_sg" {
   name        = "nat_instance_sg"
   description = "Allow TLS inbound traffic"
@@ -181,8 +123,7 @@ resource "aws_security_group" "nat_instance_sg" {
 }
 
 
-#Please note that SSM has SSH and rpcbind disabled for additional hardening, but you can hit it via
-#AWS SSM session manager
+#Done correctly, you can SSM:SM into this instance
 resource "aws_instance" "NatInstance" {
   ami                         = data.aws_ami.al2_ami.id
   instance_type               = "t2.micro"
@@ -190,7 +131,7 @@ resource "aws_instance" "NatInstance" {
   associate_public_ip_address = "true"
   source_dest_check           = "false"
   vpc_security_group_ids      = [aws_security_group.nat_instance_sg.id]
-  iam_instance_profile        = aws_iam_instance_profile.ssm_instance_profile_tf.id
+  iam_instance_profile        = var.SSMInstanceProfile
   user_data                   = <<EOF
 #!/bin/bash
 sudo sysctl -w net.ipv4.ip_forward=1
@@ -204,14 +145,3 @@ sudo systemctl stop rpcbind
   }
 }
 
-output "private_subnet_id" {
-  value = aws_subnet.tf_public_subnet.id
-}
-
-output "vpc_id" {
-  value = aws_vpc.main.id
-}
-
-output "nat_instance_id" {
-  value = aws_instance.NatInstance.id
-}

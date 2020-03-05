@@ -3,3 +3,4 @@
 *.plan
 .terraform
 .terraform.tfstate.lock.info
+.DS_store
