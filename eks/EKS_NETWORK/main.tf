@@ -33,6 +33,7 @@ resource "aws_vpc" "main" {
   enable_dns_hostnames = "true"
   tags = {
     Name = "tf_VPC"
+    "kubernetes.io/cluster/EKSClusterTF" = "shared"
   }
 }
 
@@ -42,16 +43,36 @@ resource "aws_subnet" "tf_priv_subnet" {
   availability_zone = data.aws_availability_zones.available.names[0]
   tags = {
     Name = "tf_priv_subnet"
+    "kubernetes.io/cluster/EKSClusterTF" = "shared"
+
+  }
+}
+
+resource "aws_subnet" "tf_priv_subnet2" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.13.37.32/27"
+  availability_zone = data.aws_availability_zones.available.names[1]
+  tags = {
+    Name = "tf_priv_subnet2"
+    "kubernetes.io/cluster/EKSClusterTF" = "shared"
 
   }
 }
 
 resource "aws_subnet" "tf_public_subnet" {
   vpc_id            = aws_vpc.main.id
-  cidr_block        = "10.13.37.32/27"
+  cidr_block        = "10.13.37.64/27"
   availability_zone = data.aws_availability_zones.available.names[0]
   tags = {
     Name = "tf_public_subnet"
+  }
+}
+resource "aws_subnet" "tf_public_subnet2" {
+  vpc_id            = aws_vpc.main.id
+  cidr_block        = "10.13.37.96/27"
+  availability_zone = data.aws_availability_zones.available.names[1]
+  tags = {
+    Name = "tf_public_subnet2"
   }
 }
 
@@ -76,6 +97,19 @@ resource "aws_route_table" "tf_private_route_table" {
   }
 }
 
+resource "aws_route_table" "tf_private_route_table2" {
+  vpc_id = aws_vpc.main.id
+
+  route {
+    cidr_block  = "0.0.0.0/0"
+    instance_id = aws_instance.NatInstance2.id
+  }
+
+  tags = {
+    Name = "private_subnet_route_table2"
+  }
+}
+
 resource "aws_route_table" "tf_public_route_table" {
   vpc_id = aws_vpc.main.id
 
@@ -94,9 +128,19 @@ resource "aws_route_table_association" "tf_public_route_association" {
   route_table_id = aws_route_table.tf_public_route_table.id
 }
 
+resource "aws_route_table_association" "tf_public_route_association2" {
+  subnet_id      = aws_subnet.tf_public_subnet2.id
+  route_table_id = aws_route_table.tf_public_route_table.id
+}
+
 resource "aws_route_table_association" "tf_private_route_association" {
   subnet_id      = aws_subnet.tf_priv_subnet.id
   route_table_id = aws_route_table.tf_private_route_table.id
+}
+
+resource "aws_route_table_association" "tf_private_route_association2" {
+  subnet_id      = aws_subnet.tf_priv_subnet2.id
+  route_table_id = aws_route_table.tf_private_route_table2.id
 }
 
 resource "aws_security_group" "nat_instance_sg" {
@@ -145,3 +189,23 @@ sudo systemctl stop rpcbind
   }
 }
 
+resource "aws_instance" "NatInstance2" {
+  ami                         = data.aws_ami.al2_ami.id
+  instance_type               = "t2.micro"
+  subnet_id                   = aws_subnet.tf_public_subnet2.id
+  associate_public_ip_address = "true"
+  source_dest_check           = "false"
+  vpc_security_group_ids      = [aws_security_group.nat_instance_sg.id]
+  iam_instance_profile        = var.SSMInstanceProfile
+  user_data                   = <<EOF
+#!/bin/bash
+sudo sysctl -w net.ipv4.ip_forward=1
+sudo /sbin/iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+sudo service sshd stop
+sudo systemctl stop rpcbind
+  EOF
+
+  tags = {
+    Name = "NatInstance2"
+  }
+}

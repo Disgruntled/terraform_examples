@@ -3,8 +3,8 @@ provider "aws" {
   region  = var.region
 }
 
-resource "aws_security_group" "eks_cluster_sg" {
-  name        = "EKSClusterSG"
+resource "aws_security_group" "ClusterSG" {
+  name        = "ClusterG"
   description = "Cluster communication with worker nodes"
   vpc_id      = var.vpc_id
 
@@ -16,16 +16,18 @@ resource "aws_security_group" "eks_cluster_sg" {
   }
 
   tags = {
-    Name = "EKSClusterSG"
+    Name = "ClusterSG"
   }
 }
 
+
 resource "aws_eks_cluster" "EKSClusterTF" {
   name            = "EKSClusterTF"
-  role_arn        = cluster_role
+  role_arn        = var.cluster_role
 
   vpc_config {
-    security_group_ids = aws_security_group.eks_cluster_sg.id
-    subnet_ids         = [subnet_id]
+    subnet_ids         = [var.subnet_id, var.subnet_id2]
+    endpoint_public_access = true 
+    security_group_ids = [aws_security_group.ClusterSG.id]
   }
 }

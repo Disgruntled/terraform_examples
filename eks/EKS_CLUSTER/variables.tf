@@ -16,7 +16,9 @@ variable "vpc_id"{
 variable "subnet_id"{
     type    = string
 }
-
+variable "subnet_id2"{
+    type    = string
+}
 variable "cluster_role"{
     type    = string
 }

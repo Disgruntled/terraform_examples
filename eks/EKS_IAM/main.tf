@@ -5,7 +5,7 @@ provider "aws" {
 }
 
 resource "aws_iam_role" "EKSClusterRole" {
-  name = "terraform-eks-demo-cluster"
+  name = "EKSClusterRole"
 
   assume_role_policy = <<POLICY
 {

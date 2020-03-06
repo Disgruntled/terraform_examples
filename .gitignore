@@ -4,3 +4,6 @@
 .terraform
 .terraform.tfstate.lock.info
 .DS_store
+liam.out
+eks/liam.out
+eks/liam.out
