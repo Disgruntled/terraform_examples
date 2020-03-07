@@ -48,5 +48,7 @@ EKS_CLUSTER builds out the EKS cluster in the two private subnets as part of you
 
 There is however an interesting artifact, when making an EKS cluster, a security group is created that is NOT tracked by terraform, this means if you terraform destroy later on it will fail on the destruction of the VPC becauase the securty group remain after the EKS cluster is destroyed by terraform. In order for terraform to manage this resource, you have to import it. import_cluster_sg.sh will do that for you in a bit of a hacky way, but hey it's done right?
 
+For this deployment to "go well" first terraform init/plan/apply, then run import_cluster_sg.sh to manage the created security group.
+
 
 
