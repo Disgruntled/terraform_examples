@@ -45,8 +45,10 @@ resource "aws_security_group" "ClusterSG" {
     cidr_blocks = ["0.0.0.0/0"]
   }
 
+#Kubernetes needs to own it "owns" this sg. Not required if you only use one, but aught to be present for future proofing.
   tags = {
     Name = "ClusterSG"
+    "kubernetes.io/cluster/EKSClusterTF" = "owned"
   }
 }
 

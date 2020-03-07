@@ -34,6 +34,9 @@ resource "aws_vpc" "main" {
   cidr_block           = "10.13.37.0/24"
   enable_dns_support   = "true"
   enable_dns_hostnames = "true"
+
+  #EKS uses tags on VPC/Subnets for discovery.
+  #The tag key should be a variable and allow the user to specify the cluster name. TODO: add that functionality.
   tags = {
     Name = "tf_VPC"
     "kubernetes.io/cluster/EKSClusterTF" = "shared"
@@ -46,10 +49,12 @@ resource "aws_subnet" "tf_priv_subnet" {
   availability_zone = data.aws_availability_zones.available.names[0]
 
   #Subnets used by kubernetes must be tagged as such, with a tag that references the name of your cluster
-  #Creating the EKS cluster does this, but these have been set in the infra such that later modifications don't over write the tag values
+  #Creating the EKS cluster does this, but these have been set in the infra such that later modifications don't over write the tag values. This is teh value "shared"
+  #private subnets used by your EKS cluster need "kubernetes.io/role/internal-elb = 1"
   tags = {
     Name = "tf_priv_subnet"
     "kubernetes.io/cluster/EKSClusterTF" = "shared"
+    "kubernetes.io/role/internal-elb" = "1"
 
   }
 }
@@ -61,6 +66,8 @@ resource "aws_subnet" "tf_priv_subnet2" {
   tags = {
     Name = "tf_priv_subnet2"
     "kubernetes.io/cluster/EKSClusterTF" = "shared"
+    "kubernetes.io/role/internal-elb" = "1"
+
 
   }
 }
@@ -69,8 +76,12 @@ resource "aws_subnet" "tf_public_subnet" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.13.37.64/27"
   availability_zone = data.aws_availability_zones.available.names[0]
+
+  #Public subnets (where you want public ELBs), need the tag "kubernetes.io/role/elb" = "1"
   tags = {
     Name = "tf_public_subnet"
+    "kubernetes.io/cluster/EKSClusterTF" = "shared"
+    "kubernetes.io/role/elb" = "1"
   }
 }
 resource "aws_subnet" "tf_public_subnet2" {
@@ -79,6 +90,8 @@ resource "aws_subnet" "tf_public_subnet2" {
   availability_zone = data.aws_availability_zones.available.names[1]
   tags = {
     Name = "tf_public_subnet2"
+    "kubernetes.io/cluster/EKSClusterTF" = "shared"
+    "kubernetes.io/role/elb" = "1"
   }
 }
 
