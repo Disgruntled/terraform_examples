@@ -34,6 +34,12 @@ subnet_id2 = module.network.private_subnet_id2
 
 }
 
+module "eks_workers" {
+source = "./EKS_WORKERS"
+vpc_id = module.network.vpc_id
+cluster_sg = module.eks_cluster.ClusterSG
+
+}
 
 
 
