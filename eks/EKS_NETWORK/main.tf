@@ -3,6 +3,9 @@ provider "aws" {
   region  = var.region
 }
 
+
+#Grab the latest AL2 AMI to use in our nat instances.
+#Works in any region.
 data "aws_ami" "al2_ami" {
   most_recent = true
   owners      = ["amazon"]
@@ -22,7 +25,7 @@ data "aws_ami" "al2_ami" {
 }
 
 
-
+#Get the latest list of AZs in our region.
 data "aws_availability_zones" "available" {
   state = "available"
 }
@@ -41,6 +44,9 @@ resource "aws_subnet" "tf_priv_subnet" {
   vpc_id            = aws_vpc.main.id
   cidr_block        = "10.13.37.0/27"
   availability_zone = data.aws_availability_zones.available.names[0]
+
+  #Subnets used by kubernetes must be tagged as such, with a tag that references the name of your cluster
+  #Creating the EKS cluster does this, but these have been set in the infra such that later modifications don't over write the tag values
   tags = {
     Name = "tf_priv_subnet"
     "kubernetes.io/cluster/EKSClusterTF" = "shared"

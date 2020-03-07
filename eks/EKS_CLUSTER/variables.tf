@@ -19,6 +19,6 @@ variable "subnet_id"{
 variable "subnet_id2"{
     type    = string
 }
-variable "cluster_role"{
-    type    = string
-}
+#variable "cluster_role"{
+#    type    = string
+#}
