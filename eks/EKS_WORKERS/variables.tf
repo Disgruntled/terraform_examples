@@ -15,5 +15,24 @@ variable "vpc_id"{
 
 variable "cluster_sg"{
     type    = string
-  
+}
+
+variable "cluster_ca"{
+    type    = string
+}
+
+variable "cluster_endpoint"{
+    type    = string
+}
+
+variable "cluster_version"{
+    type    = string
+}
+
+variable "cluster_subnet_1"{
+    type    = string
+}
+
+variable "cluster_subnet_2"{
+    type    = string
 }

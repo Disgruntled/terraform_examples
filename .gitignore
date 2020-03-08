@@ -8,3 +8,4 @@ liam.out
 eks/liam.out
 eks/liam.out
 scratch
+config_map_aws_auth.yaml
