@@ -44,6 +44,26 @@ EKS_NETWORK builds out the network as described above
 
 EKS_CLUSTER builds out the EKS cluster in the two private subnets as part of your network. 
 
-Coming soon: Node group spinup
+### EKS Nodes
 
+The EKS_WORKERS module creates an autoscaling group in your to host your kubernetes nodes. This will be spun up, but you have to manually tell kubectl to let them join the cluster. The auto scaling group is currently using the default EKS optimized AMI, but my plan is to later roll my own AMI that has SSM agent installed.
+
+With some instructions stolen right from the official terraform guide on EKS, you may do the following after your terraform apply is complete to configure your kubernetes cluster to allow your nodes to join.
+
+Essentially, we're telling eks to allow hosts with that IAM Role/Instance profile to be allowed to join the cluster.
+
+```
+terraform output config_map_aws_auth and save the configuration into a file, e.g. config_map_aws_auth.yaml
+kubectl apply -f config_map_aws_auth.yaml
+```
+
+### Kubectl config
+
+To update your kubectl to work with EKS, you may simply run:
+
+```
+aws eks update-kubeconfig --name EKSClusterTF
+```
+
+Replacing EKSClusterTF, if you have renamed the cluster.
 
