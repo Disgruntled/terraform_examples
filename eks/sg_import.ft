@@ -1,7 +1,0 @@
-#used by import_cluster_sg.sh track the security group
-
-resource "aws_security_group" "ClusterMasterSg" {
-  depends_on = [
-   module.eks_cluster
-  ]
-}
