@@ -39,7 +39,7 @@ resource "aws_vpc" "main" {
   #The tag key should be a variable and allow the user to specify the cluster name. TODO: add that functionality.
   tags = {
     Name = "tf_VPC"
-    "kubernetes.io/cluster/EKSClusterTF" = "shared"
+    "kubernetes.io/cluster/${var.clustername}" = "shared"
   }
 }
 
@@ -53,7 +53,7 @@ resource "aws_subnet" "tf_priv_subnet" {
   #private subnets used by your EKS cluster need "kubernetes.io/role/internal-elb = 1"
   tags = {
     Name = "tf_priv_subnet"
-    "kubernetes.io/cluster/EKSClusterTF" = "shared"
+    "kubernetes.io/cluster/${var.clustername}" = "shared"
     "kubernetes.io/role/internal-elb" = "1"
 
   }
@@ -65,7 +65,7 @@ resource "aws_subnet" "tf_priv_subnet2" {
   availability_zone = data.aws_availability_zones.available.names[1]
   tags = {
     Name = "tf_priv_subnet2"
-    "kubernetes.io/cluster/EKSClusterTF" = "shared"
+    "kubernetes.io/cluster/${var.clustername}" = "shared"
     "kubernetes.io/role/internal-elb" = "1"
 
 
@@ -80,7 +80,7 @@ resource "aws_subnet" "tf_public_subnet" {
   #Public subnets (where you want public ELBs), need the tag "kubernetes.io/role/elb" = "1"
   tags = {
     Name = "tf_public_subnet"
-    "kubernetes.io/cluster/EKSClusterTF" = "shared"
+    "kubernetes.io/cluster/${var.clustername}" = "shared"
     "kubernetes.io/role/elb" = "1"
   }
 }
@@ -90,7 +90,7 @@ resource "aws_subnet" "tf_public_subnet2" {
   availability_zone = data.aws_availability_zones.available.names[1]
   tags = {
     Name = "tf_public_subnet2"
-    "kubernetes.io/cluster/EKSClusterTF" = "shared"
+    "kubernetes.io/cluster/${var.clustername}" = "shared"
     "kubernetes.io/role/elb" = "1"
   }
 }

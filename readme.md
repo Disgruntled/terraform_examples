@@ -38,11 +38,22 @@ Nat instances can be way cheaper than Nat gateways, and as this instance is t2.m
 
 So this is somethign a bit neat, this will create a multi AZ deployment of the VPC with nat instance above, but will also deploy an EKS cluster into that, and takes care of creating the service linked roles for you. As part of the expansion of my learning journey, this was done with terraform modules and it was actually really hand.
 
+the EKS deployment takes on extra, optional variable "clustername". Defaults to "EKSClusterTF" if none is specified.
+
+Sample Invocation:
+
+```
+terraform plan -out liam.plan -var="region=us-east-2" -var="profile=saml" -var="clustername=foocluster"
+```
+
+
 SSM_IAM creates the instance profile/roles to use SSM on your nat instances, and your cluser nodes should you want. Also very handy for using them as a remote workstation.
 
 EKS_NETWORK builds out the network as described above
 
 EKS_CLUSTER builds out the EKS cluster in the two private subnets as part of your network. 
+
+EKS_WORKERS spins up two nodes and configures them to join your cluster.
 
 ### EKS Nodes
 
@@ -62,7 +73,7 @@ kubectl apply -f config_map_aws_auth.yaml
 To update your kubectl to work with EKS, you may simply run:
 
 ```
-aws eks update-kubeconfig --name EKSClusterTF
+aws eks update-kubeconfig --name [YourClusterNameHere]
 ```
 
 Replacing EKSClusterTF, if you have renamed the cluster.

@@ -1,13 +1,3 @@
-variable "region" {
-  type    = string
-  default = "us-east-1"
-}
-
-variable "profile" {
-  type    = string
-  default = "default"
-}
-
 provider "aws" {
   profile = var.profile
   region  = var.region
@@ -21,6 +11,7 @@ module "instance_profile_build" {
 module "network" {
   source = "./EKS_NETWORK"
   SSMInstanceProfile = module.instance_profile_build.InstanceProfileName
+  clustername = var.clustername
 }
 
 
@@ -31,6 +22,7 @@ source = "./EKS_CLUSTER"
 vpc_id = module.network.vpc_id
 subnet_id = module.network.private_subnet_id
 subnet_id2 = module.network.private_subnet_id2
+clustername = var.clustername
 
 }
 
@@ -43,6 +35,7 @@ cluster_ca = module.eks_cluster.ClusterCA
 cluster_version = module.eks_cluster.ClusterVersion
 cluster_subnet_1 = module.network.private_subnet_id
 cluster_subnet_2 = module.network.private_subnet_id2
+clustername = var.clustername
 
 }
 
@@ -68,6 +61,4 @@ CONFIGMAPAWSAUTH
 
 }
 
-output "config_map_aws_auth" {
-  value = local.config_map_aws_auth
-}
+

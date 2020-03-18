@@ -66,7 +66,7 @@ resource "aws_security_group" "EKSNodeSG" {
 
   tags = {
     "Name"                                      = "Eks Node Security Group"
-    "kubernetes.io/cluster/EKSClusterTF" = "owned"
+    "kubernetes.io/cluster/${var.clustername}" = "owned"
   }
 }
 
@@ -120,20 +120,19 @@ locals {
   demo-node-userdata = <<USERDATA
 #!/bin/bash
 set -o xtrace
-/etc/eks/bootstrap.sh --apiserver-endpoint '${var.cluster_endpoint}' --b64-cluster-ca '${var.cluster_ca}' EKSClusterTF
+/etc/eks/bootstrap.sh --apiserver-endpoint '${var.cluster_endpoint}' --b64-cluster-ca '${var.cluster_ca}' '${var.clustername}''
 USERDATA
 
 }
 
 resource "aws_launch_configuration" "EksCluster" {
-  associate_public_ip_address = true
   iam_instance_profile        = aws_iam_instance_profile.EKSWorkerNodeProfile.name
   image_id                    = data.aws_ami.eks-worker.id
   instance_type               = "m4.large"
   name_prefix                 = "EKSCluster"
   security_groups  = [aws_security_group.EKSNodeSG.id]
   user_data_base64 = base64encode(local.demo-node-userdata)
-  associate_public_ip_address = False
+  associate_public_ip_address = false
 
   lifecycle {
     create_before_destroy = true
@@ -154,7 +153,7 @@ resource "aws_autoscaling_group" "EKSNodes" {
   }
 
   tag {
-    key                 = "kubernetes.io/cluster/EKSClusterTF"
+    key                 = "kubernetes.io/cluster/${var.clustername}"
     value               = "owned"
     propagate_at_launch = true
   }

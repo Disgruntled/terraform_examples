@@ -8,11 +8,6 @@ variable "profile" {
   default = "default"
 }
 
-variable "SSMInstanceProfile"{
-    type    = string
-  
-}
-
 variable "clustername" {
   type    = string
 }

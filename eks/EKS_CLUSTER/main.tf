@@ -48,13 +48,13 @@ resource "aws_security_group" "ClusterSG" {
 #Kubernetes needs to own it "owns" this sg. Not required if you only use one, but aught to be present for future proofing.
   tags = {
     Name = "ClusterSG"
-    "kubernetes.io/cluster/EKSClusterTF" = "owned"
+    "kubernetes.io/cluster/${var.clustername}" = "owned"
   }
 }
 
 
 resource "aws_eks_cluster" "EKSClusterTF" {
-  name            = "EKSClusterTF"
+  name            = var.clustername
   role_arn        = aws_iam_role.EKSClusterRole.arn
 
 

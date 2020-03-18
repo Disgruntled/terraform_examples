@@ -36,3 +36,7 @@ variable "cluster_subnet_1"{
 variable "cluster_subnet_2"{
     type    = string
 }
+
+variable "clustername" {
+  type    = string
+}
