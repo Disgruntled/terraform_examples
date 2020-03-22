@@ -78,3 +78,12 @@ aws eks update-kubeconfig --name [YourClusterNameHere]
 
 Replacing EKSClusterTF, if you have renamed the cluster.
 
+### Helm
+
+There's a simple helm chart to install deployment of my simple container 'forever200' via helm.
+
+To deploy the container to the cluster and have it accesible via ELB, you can navigate to the eks/helm directory and run:
+
+```
+helm install forever200 ./forever200
+```
