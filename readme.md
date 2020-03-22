@@ -76,7 +76,7 @@ To update your kubectl to work with EKS, you may simply run:
 aws eks update-kubeconfig --name [YourClusterNameHere]
 ```
 
-Replacing EKSClusterTF, if you have renamed the cluster.
+With the cluster name of your choice
 
 ### Helm
 
@@ -87,3 +87,5 @@ To deploy the container to the cluster and have it accesible via ELB, you can na
 ```
 helm install forever200 ./forever200
 ```
+
+The helm chart is basically the default one you get from 'helm create', with the slightest of modifications to start my container and use it with a 'loadbalancer'
