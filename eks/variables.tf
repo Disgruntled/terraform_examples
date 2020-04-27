@@ -10,4 +10,5 @@ variable "profile" {
 
 variable "clustername" {
   type    = string
+  default = "EKSclusterTF"
 }
