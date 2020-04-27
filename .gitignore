@@ -8,3 +8,4 @@
 *.plan
 scratch
 config_map_aws_auth.yaml
+scratch_trustrelationship.json
