@@ -15,31 +15,67 @@ resource "aws_iam_policy" "permissions_boundary_policy" {
             ],
             "Resource": "*"
         },
+            {
+            "Sid": "NoBoundaryModify",
+            "Effect": "Deny",
+            "Action": [
+                "iam:DeletePolicyVersion",
+                "iam:SetDefaultPolicyVersion",
+                "iam:CreatePolicyVersion",
+                "iam:DeletePolicy"
+            ],
+            "Resource": "arn:aws:iam::*:policy/IAMLimitedEditBoundary"
+        },
+            {
+            "Sid": "AllowModifyCustomerPolicies",
+            "Effect": "Allow",
+            "Action": [
+                "iam:DeletePolicyVersion",
+                "iam:SetDefaultPolicyVersion",
+                "iam:CreatePolicyVersion",
+                "iam:CreatePolicy",
+                "iam:DeletePolicy"
+            ],
+            "Resource": "arn:aws:iam::*:policy/customer-policies/*"
+        },
         {
             "Sid": "CreateOrChangeOnlyWithBoundaryInPath",
             "Effect": "Allow",
             "Action": [
-                "iam:CreateUser",
-                "iam:DeleteUserPolicy",
                 "iam:AttachUserPolicy",
                 "iam:DetachUserPolicy",
                 "iam:PutUserPermissionsBoundary",
-                "iam:PutUserPolicy",
                 "iam:CreateRole",
-                "iam:DeleteRolePolicy",
                 "iam:AttachRolePolicy",
                 "iam:DetachRolePolicy",
-                "iam:PutRolePermissionsBoundary",
-                "iam:PutRolePolicy"
+                "iam:PutRolePermissionsBoundary"
             ],
             "Resource": [
-                "arn:aws:iam::*:user/customer-roles/*",
-                "arn:aws:iam::*:group/customer-roles/*",
+                "arn:aws:iam::*:user/customer-users/*",
                 "arn:aws:iam::*:role/customer-roles/*"
             ],
             "Condition": {
                 "StringLike": {
                     "iam:PermissionsBoundary": "arn:aws:iam::*:policy/IAMLimitedEditBoundary"
+                }
+            }
+        },
+        {
+            "Sid": "AttachOnlyCustomerPolicies",
+            "Effect": "Allow",
+            "Action": [
+                "iam:AttachUserPolicy",
+                "iam:DetachUserPolicy",
+                "iam:AttachRolePolicy",
+                "iam:DetachRolePolicy"
+            ],
+            "Resource": [
+                "arn:aws:iam::*:user/customer-users/*",
+                "arn:aws:iam::*:role/customer-roles/*"
+            ],
+            "Condition": {
+                "ArnLike": {
+                  "iam:PolicyARN" : "arn:aws:iam::*:policy/customer-policies/*"
                 }
             }
         },
