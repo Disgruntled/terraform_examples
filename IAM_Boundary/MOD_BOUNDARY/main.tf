@@ -42,12 +42,8 @@ resource "aws_iam_policy" "permissions_boundary_policy" {
             "Sid": "CreateOrChangeOnlyWithBoundaryInPath",
             "Effect": "Allow",
             "Action": [
-                "iam:AttachUserPolicy",
-                "iam:DetachUserPolicy",
                 "iam:PutUserPermissionsBoundary",
                 "iam:CreateRole",
-                "iam:AttachRolePolicy",
-                "iam:DetachRolePolicy",
                 "iam:PutRolePermissionsBoundary"
             ],
             "Resource": [
