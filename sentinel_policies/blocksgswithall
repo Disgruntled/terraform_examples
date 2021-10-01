@@ -1,7 +1,7 @@
 # This policy uses the Sentinel tfplan/v2 import to validate that no security group
 # rules have the CIDR "0.0.0.0/0" for ingress rules.  It covers both the
 # aws_security_group and the aws_security_group_rule resources which can both
-# define rules.
+# define rules and it was probably syeds fault.
 
 # Import the tfplan/v2 import, but use the alias "tfplan"
 import "tfplan/v2" as tfplan
