@@ -20,19 +20,30 @@ profile should be the profile within .aws/credentials that terraform will use to
 
 Due note that it is necesarry to include variables in terraform destroy later as well.
 
-## vpc_with_nat_gw.tf
+## vpc_nat_gw
 
 This will create a two subnet-vpc with a nat GW, and the public/private routing setup.
 
-It will also create a iam role/instance profile for use with SSM, so you can use SSM-Session Manager to connect into it, which is easy if you're lazy.
+It will also create a iam role/instance profile for use with SSM, so you can use SSM-Session Manager to connect into it, which is easy if you like things simple.
 
-## vpc_with_nat_instance.tf
+## vpc_nat_instance
 
 This will create a two subnet-vpc with a nat instance, and the public/private routing setup.
 
-It will also create a iam role/instance profile for use with SSM, so you can use SSM-Session Manager to connect into it, which is easy if you're lazy.
+It will also create a iam role/instance profile for use with SSM, so you can use SSM-Session Manager to connect into it, which is easy if you like things simple.
 
 Nat instances can be way cheaper than Nat gateways, and as this instance is t2.micro, it is both free tier eligible and much cheaper than a nat gateway
+
+
+## vpc_nat_instance_anf
+
+This will create a three subnet-vpc with a nat instance, and the public/private routing setup with amazon network firewall doing inspection.
+
+It will also create a iam role/instance profile for use with SSM, so you can use SSM-Session Manager to connect into it, which is easy if you like things simple.
+
+Nat instances can be way cheaper than Nat gateways, and as this instance is t2.micro, it is both free tier eligible and much cheaper than a nat gateway
+
+I made this one much later on in my terraform journey so true to best practice, the terraform files are seperated out.
 
 ## EKS
 
