@@ -45,6 +45,10 @@ Nat instances can be way cheaper than Nat gateways, and as this instance is t2.m
 
 I made this one much later on in my terraform journey so true to best practice, the terraform files are seperated out.
 
+## sentinel_policies
+
+A location where a sample sentinel config one one sentinel policy as code script is kept. The example policy as code document is essentially a straight copy from a hashi example.
+
 ## EKS
 
 So this is somethign a bit neat, this will create a multi AZ deployment of the VPC with nat instance above, but will also deploy an EKS cluster into that, and takes care of creating the service linked roles for you. As part of the expansion of my learning journey, this was done with terraform modules and it was actually really hand.
